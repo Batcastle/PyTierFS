@@ -268,11 +268,13 @@ def manage_tier(tier_settings: dict, drive_settings: dict, pipe) -> None:
             pipe.send(tier_obj.get_file_info(command[1]))
         elif command[0].upper() == "OPEN_FILE":
             pipe.send(tier_obj.open_file(command[1]))
+        elif command[0].upper() in ("MAKE_NEW_FILE", "NEW_FILE"):
+            pipe.send(tier_obj.make_new_file(command[1]))
         elif command[0].upper() == "COPY_FILE":
             pipe.send(tier_obj.copy_file(command[1][0], command[1][1]))
         elif command[0].upper() == "MOVE_FILE":
             pipe.send(tier_obj.move_file(command[1][0], command[1][1]))
-        elif command[0].upper() == "DELETE_FILE":
+        elif command[0].upper() in ("DELETE_FILE", "REMOVE_FILE", "REMOVE", "DELETE"):
             try:
                 tier_obj.remove_file(command[1])
             except FileNotFoundError:
@@ -293,7 +295,7 @@ def manage_tier(tier_settings: dict, drive_settings: dict, pipe) -> None:
             pipe.send(tier_obj.apply_index(command[1]))
         elif command[0].upper() == "GET_DRIVE_NAMES":
             pipe.send({"DRIVE_NAMES": tier_obj.get_drive_names()})
-        elif command[0].upper() == "STARTUP":
+        elif command[0].upper() in ("STARTUP", "INIT", "START"):
             tier_obj = Tier(tier_settings, drive_settings)
             pipe.send(True)
         else:

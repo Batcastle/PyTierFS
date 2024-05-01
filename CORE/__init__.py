@@ -29,17 +29,31 @@ import threading
 
 def init(tier_settings: dict, drive_settings: dict, tier_multiproc_settings: dict) -> None:
     """Setup and run intra- and inter-tier processing thread(s)"""
-    tiers = []
+    tiers = {}
+    pipes = {}
     for each in tier_settings:
         # If whether to use threads or procs has not been defined, use threads
+        drives = {}
+        for each1 in tier_settings[each]["drives"]:
+            drives[each1] = drive_settings[each1]
+        _ = multiproc.Pipe(duplex=True)
+        pipes[each] = _[1]
         if each in tier_multiproc_settings:
             if tier_multiproc_settings[each]:
                 # using procs
-                pass
+                tiers[each] = multiproc.Process(target=tiers.manage_tier, args=(tier_settings[each], drives, _[0]))
             else:
                 # using threads
-                pass
+                tiers[each] = threading.Thread(target=tiers.manage_tier, args=(tier_settings[each], drives, _[0]))
 
         else:
-            pass
+            tiers[each] = threading.Thread(target=tiers.manage_tier, args=(tier_settings[each], drives, _[0]))
+
+    for each in tiers:
+        tiers[each].start()
+    for each in pipes:
+        pipes[each].send(["STARTUP"])
+
+    # At this point, all our tiers are started up and initalized we can connect to our parent process and start accepting commands
+
 
