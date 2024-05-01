@@ -1,2 +1,31 @@
 # PyTierFS
-Tiered storage system for home use. Provides built-in RAMDisk, arbitrary tiering, FTP and SMB access, RESTful API, and GUI interface to configure.
+Python-based Tiered storage network filesystem for home use. Provides built-in RAMDisk, arbitrary tiering, FTP and SMB access, RESTful API, and GUI web interface to configure.
+
+    - Arbitrary tier count
+        - Select drives to use, and let PyTierFS benchmark them and auto-tier them out
+        - Keeps an index of all drives to aid in rapid searchs
+        - The more a file is accessed, the higher up the tiers it is moved
+        - Tiers numbered
+            - lower=slower -> higher=faster
+    - Graphical web interface via Flask
+    - RESTful API
+    - SMB support
+    - FTP/FTPS support
+    - Underlying FS can be anything
+        - If BTRFS, utilizes BTRFS RAID, CoW, etc
+        - If ZFS, utilizes built-in tiering, CoW, etc
+        - NTFS: utilizes built-in indexing engine for searches
+        - FAT32/exFAT: use for metadata only. Do not trust.
+        - Anything else, it has a built-in fall back interface to use.
+    - Saves metadata to disk before shutdown to reduce start-up load
+        - Uses FAT32/exFAT drive if available thanks to their high IOPS speed
+        - If FAT32/exFAT drive is not available, will store in highest, non-volatile tier
+        - If Metadata is not available, it will be regenerated on the fly
+    - Compiled for better speed and portability with Nuitka
+        - Some parts will be written in Rust
+    - Uses advanced memory management to reduce memory overhead
+    - OOP-based design
+    - Dynamically Multi-threaded
+        - Users can configure if a given tier has a whole process, or a syncronus thread unto itself
+        - RAM Disk gets a whole process by default, as does the core of PyTierFS
+        - API and GUI web interface both get syncronus threads due to high wait times involved.
